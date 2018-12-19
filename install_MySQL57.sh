@@ -74,20 +74,23 @@ if [ ${iptables_yn} = 'n' ];then
     systemctl stop firewalld.service && systemctl disable firewalld.service
     systemctl stop iptables.service >/dev/null 2>&1
     systemctl disable iptables.service >/dev/null 2>&1
-    systemctl stop NetworkManager.service >/dev/null 2>&1
-    systemctl disable NetworkManager.service >/dev/null 2>&1
   else
     service iptables stop
     chkconfig iptables off
-    #线上环境不需要图形化网络管理工具
-    service NetworkManager stop >/dev/null 2>&1
-    chkconfig NetworkManager off >/dev/null 2>&1
   fi
 fi
 
-#关闭selinux和NetworkManager
+#关闭selinux
 setenforce 0
 sed -i 's/^SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config
+#关闭NetworkManager， #线上环境不需要图形化网络管理工具
+if [ ${CentOS_ver} = 7 ];then
+  systemctl stop NetworkManager.service >/dev/null 2>&1
+  systemctl disable NetworkManager.service >/dev/null 2>&1
+else
+  service NetworkManager stop >/dev/null 2>&1
+  chkconfig NetworkManager off >/dev/null 2>&1
+fi
 
 #卸载自带的mariadb、mariadb-libs
 rpm -e --nodeps mariadb >/dev/null 2>&1
