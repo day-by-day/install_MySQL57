@@ -210,7 +210,7 @@ innodb_thread_concurrency = 0
 innodb_sync_spin_loops = 100
 innodb_spin_wait_delay = 30
 #innodb_additional_mem_pool_size = 16M
-innodb_buffer_pool_size = 1434M
+innodb_buffer_pool_size = 1434M                 #单个实例的话，设置成服务器内存的百分之八十
 innodb_buffer_pool_instances = 8
 innodb_buffer_pool_load_at_startup = 1
 innodb_buffer_pool_dump_at_shutdown = 1
@@ -295,8 +295,8 @@ EOF
     #mysql修改初始密码
     # PASSWD=$(grep 'password is' /data/mysql/mysql3306/data/error.log  | awk '{print $NF}')
     # mysql -uroot -p"$PASSWD" --connect-expired-password -e "alter user user() identified by '${dbrootpwd}';"
-    ${mysql_install_dir}/bin/mysql -S ${mysql_data_dir}/run/mysql.sock -e "grant all privileges on *.* to root@'127.0.0.1' identified by 'Passw0rd' with grant option;"
-    ${mysql_install_dir}/bin/mysql -S ${mysql_data_dir}/run/mysql.sock -e "grant all privileges on *.* to root@'localhost' identified by 'Passw0rd' with grant option;"
+    ${mysql_install_dir}/bin/mysql -S ${mysql_data_dir}/run/mysql.sock -e "grant all privileges on *.* to root@'127.0.0.1' identified by 'P@ssw0rd' with grant option;"
+    ${mysql_install_dir}/bin/mysql -S ${mysql_data_dir}/run/mysql.sock -e "grant all privileges on *.* to root@'localhost' identified by 'P@ssw0rd' with grant option;"
     ${mysql_install_dir}/bin/mysql -S ${mysql_data_dir}/run/mysql.sock -uroot -p'Passw0rd' -e "reset master;"
     [ -e "${mysql_install_dir}/my.cnf" ] && rm -f ${mysql_install_dir}/my.cnf
     rm -rf /etc/ld.so.conf.d/{mysql,mariadb,percona,alisql}*.conf
