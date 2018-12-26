@@ -297,7 +297,7 @@ EOF
     # mysql -uroot -p"$PASSWD" --connect-expired-password -e "alter user user() identified by '${dbrootpwd}';"
     ${mysql_install_dir}/bin/mysql -S ${mysql_data_dir}/run/mysql.sock -e "grant all privileges on *.* to root@'127.0.0.1' identified by 'P@ssw0rd' with grant option;"
     ${mysql_install_dir}/bin/mysql -S ${mysql_data_dir}/run/mysql.sock -e "grant all privileges on *.* to root@'localhost' identified by 'P@ssw0rd' with grant option;"
-    ${mysql_install_dir}/bin/mysql -S ${mysql_data_dir}/run/mysql.sock -uroot -p'Passw0rd' -e "reset master;"
+    ${mysql_install_dir}/bin/mysql -S ${mysql_data_dir}/run/mysql.sock -uroot -p'P@ssw0rd' -e "reset master;"
     [ -e "${mysql_install_dir}/my.cnf" ] && rm -f ${mysql_install_dir}/my.cnf
     rm -rf /etc/ld.so.conf.d/{mysql,mariadb,percona,alisql}*.conf
     echo "${mysql_install_dir}/lib" > /etc/ld.so.conf.d/mysql.conf && ldconfig
