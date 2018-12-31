@@ -27,7 +27,7 @@ fi
 yum clean all && yum makecache
 # yum -y update
 # yum install -y epel-release
-yum install -y ntpdate curl lrzsz
+yum install -y ntpdate curl lrzsz vim wget
 yum -y install numactl* libaio*
 
 #网络下载速度太慢
