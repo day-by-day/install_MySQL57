@@ -27,7 +27,7 @@ fi
 yum clean all && yum makecache
 # yum -y update
 # yum install -y epel-release
-yum install -y ntpdate curl lrzsz vim wget
+yum install -y ntpdate curl lrzsz vim wget fish htop 
 yum -y install numactl* libaio*
 
 #网络下载速度太慢
@@ -50,6 +50,10 @@ done
 ntpdate pool.ntp.org ;sleep 3;
 [ ! -e "/var/spool/cron/root" -o -z "$(grep 'ntpdate' /var/spool/cron/root > /dev/null 2>&1)" ] && { echo "*/20 * * * * $(which ntpdate) pool.ntp.org > /dev/null 2>&1" >> /var/spool/cron/root;chmod 600 /var/spool/cron/root; }
 
+# Set timezone  
+rm -rf /etc/localtime  
+ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime  
+
 # Check if user is root
 [ $(id -u) != "0" ] && { echo "Error: You must be root to run this script"; exit 1; }
 
@@ -68,6 +72,25 @@ while :; do echo
   fi
 done
 
+while :; do echo
+  read -e -p "Whether python3.7 and mycli are installed [y/n]: " py_yn
+  if [[ ! ${py_yn} =~ ^[y,n]$ ]]; then
+    echo "input error! Please only input 'y' or 'n'"
+  elif [[ ${upload_yn} = 'y' ]]; then
+    yum install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc make libffi-devel epel-release python-pip wget -y
+    cd /usr/local/src
+    wget https://www.python.org/ftp/python/3.7.0/Python-3.7.0.tgz
+    cd /usr/local/src/Python-3.7.0
+    make && make install
+    ln -s /usr/local/python3/bin/python3.7 /usr/bin/python3
+    ln -s /usr/local/python3/bin/pip3.7 /usr/bin/pip3
+    
+    pip3 install mycli
+    ln -s /usr/local/python3/bin/mycli /usr/local/bin/
+   else
+    break
+ done
+
 #如果需要关闭防火墙
 if [ ${iptables_yn} = 'n' ];then
   if [ ${CentOS_ver} = 7 ];then
@@ -83,6 +106,7 @@ fi
 #关闭selinux
 setenforce 0
 sed -i 's/^SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config
+echo "selinux is disable"
 #关闭NetworkManager， #线上环境不需要图形化网络管理工具
 if [ ${CentOS_ver} = 7 ];then
   systemctl stop NetworkManager.service >/dev/null 2>&1
@@ -91,6 +115,33 @@ else
   service NetworkManager stop >/dev/null 2>&1
   chkconfig NetworkManager off >/dev/null 2>&1
 fi
+
+# /etc/security/limits.conf
+echo "ulimit -SHn 102400" >> /etc/rc.local
+cat >> /etc/security/limits.conf << EOF
+ *           soft   nofile       102400
+ *           hard   nofile       102400
+ *           soft   nproc        102400
+ *           hard   nproc        102400
+EOF
+
+# /etc/sysctl.conf  
+sed -i 's/net.ipv4.tcp_syncookies.*$/net.ipv4.tcp_syncookies = 1/g' /etc/sysctl.conf  
+cat >> /etc/sysctl.conf << EOF
+vm.swappiness = 5
+vm.dirty_ratio = 20
+vm.dirty_background_ratio = 10
+net.ipv4.tcp_max_syn_backlog = 819200
+net.core.netdev_max_backlog = 400000
+net.core.somaxconn = 40960
+fs.file-max=102400 
+net.ipv4.tcp_tw_reuse = 1  
+net.ipv4.tcp_tw_recycle = 1  
+net.ipv4.ip_local_port_range = 1024 65000
+EOF
+/sbin/sysctl -p
+echo "sysctl set OK!!"
+
 
 #卸载自带的mariadb、mariadb-libs
 rpm -e --nodeps mariadb >/dev/null 2>&1
@@ -286,7 +337,9 @@ EOF
     #初始化
     ${mysql_install_dir}/bin/mysqld --defaults-file=${mysql_data_dir}/my3306.cnf --initialize-insecure --user=mysql --basedir=${mysql_install_dir} --datadir=${mysql_data_dir}/data
 
-    echo "export PATH=${mysql_install_dir}/bin:\$PATH" >> /etc/profile  && source /etc/profile
+    echo "export PATH=${mysql_install_dir}/bin:\$PATH" >> /etc/profile
+    echo 'PS1="\[\e[37;40m\][\[\e[32;40m\]\u\[\e[37;40m\]@\h \[\e[35;40m\]\W\[\e[0m\]]\\$ \[\e[33;40m\]"' >> /etc/profile
+    source /etc/profile
 
     #第一次启动MySQL
     ${mysql_install_dir}/bin/mysqld --defaults-file=${mysql_data_dir}/my3306.cnf &
