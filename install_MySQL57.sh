@@ -29,6 +29,7 @@ yum clean all && yum makecache
 # yum install -y epel-release
 yum install -y ntpdate curl lrzsz vim wget fish htop 
 yum -y install numactl* libaio*
+yum -y groupinstall "Development tools"
 
 #网络下载速度太慢
 # src_url="https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.24-linux-glibc2.12-x86_64.tar.gz"
