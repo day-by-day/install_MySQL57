@@ -77,19 +77,26 @@ while :; do echo
   read -e -p "Whether python3.7 and mycli are installed [y/n]: " py_yn
   if [[ ! ${py_yn} =~ ^[y,n]$ ]]; then
     echo "input error! Please only input 'y' or 'n'"
-  elif [[ ${upload_yn} = 'y' ]]; then
+    continue
+  elif [[ ${py_yn} = 'y' ]]; then
     yum install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc make libffi-devel epel-release python-pip wget -y
     cd /usr/local/src
     wget https://www.python.org/ftp/python/3.7.0/Python-3.7.0.tgz
+    tar -zxf Python-3.7.0.tgz
     cd /usr/local/src/Python-3.7.0
+    ./configure --prefix=/usr/local/python3
     make && make install
-    ln -s /usr/local/python3/bin/python3.7 /usr/bin/python3
-    ln -s /usr/local/python3/bin/pip3.7 /usr/bin/pip3
+    ln -s /usr/local/python3/bin/python3 /usr/bin/python3
+    ln -s /usr/local/python3/bin/pip3 /usr/bin/pip3
+    pip3 install --upgrade pip
     
-    pip3 install mycli
+    /usr/bin/pip3 install mycli
     ln -s /usr/local/python3/bin/mycli /usr/local/bin/
+    echo "install mycli finish"
+    break
    else
     break
+  fi
  done
 
 #如果需要关闭防火墙
